@@ -5,7 +5,7 @@ import {BellIcon, BookmarkIcon, ClipboardIcon, DotsCircleHorizontalIcon, Hashtag
 
 const SideBar = () => {
   return (
-    <div className='hidden sm:flex flex-col p-2 xl:items-start fixed h-full'>
+    <div className='hidden sm:flex flex-col p-2 xl:items-start fixed h-full xl:ml-24 '>
         <div className='hoverEffect p-0 hover:bg-blue-100xl:px-1'>
             <Image 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/584px-Logo_of_Twitter.svg.png"
