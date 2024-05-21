@@ -1,6 +1,6 @@
 "use client";
 
-import { EmojiHappyIcon, PhotographIcon } from '@heroicons/react/outline'
+import { EmojiHappyIcon, PhotographIcon, XIcon } from '@heroicons/react/outline'
 import React, { useEffect, useState } from 'react'
 import { auth, db , storage } from "../../firebase.jsx";
 import { onAuthStateChanged, updateCurrentUser } from 'firebase/auth';
@@ -47,6 +47,7 @@ const Input = () => {
         }
         setLoading(false);
         setInput("");
+        setSelectedFile(null);
       };
 
       const addImageToPost = (e) => {
@@ -88,6 +89,19 @@ const Input = () => {
                     >
                     </textarea>
                 </div>
+                {selectedFile && (
+                    <div className='relative'>
+                        <XIcon 
+                            onClick={() => setSelectedFile(null)}
+                            className='h-8 text-black absolute cursor-pointer shadow-md shadow-white rounded-full bg-white hover:bg-gray-200 hover:shadow-md p-1 top-0 right-0' 
+                        />
+                        <img 
+                            src={selectedFile} 
+                            className={`${loading && "animate-pulse"}`}
+
+                        />
+                    </div>
+                )}
                 <div className='flex items-center justify-between pt-2.5'>
                     <div className='flex '>
                         <div onClick={() => filePickerRef.current.click()}>
