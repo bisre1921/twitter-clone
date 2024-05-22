@@ -2,6 +2,7 @@ import SideBar from "@/component/SideBar";
 import "./globals.css";
 import Feed from "@/component/Feed";
 import Widgets from "@/component/Widgets";
+import CommentModal from "@/component/CommentModal";
  
 export default async function Home() {
   const newsResults = await fetch("https://saurav.tech/NewsAPI/everything/cnn.json").then((res) => res.json());
@@ -12,6 +13,7 @@ export default async function Home() {
       <SideBar />
       <Feed />
       <Widgets newsResults={newsResults.articles} randomUsersResult={randomUsersResult.results} />
+      <CommentModal />
     </div>
   );
 }

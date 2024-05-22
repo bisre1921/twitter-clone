@@ -8,11 +8,14 @@ import { useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import { deleteObject, ref } from 'firebase/storage'
+import { useRecoilState } from 'recoil'
+import { modalState } from '../../atom/ModalAtom'
 
 const Post = ({post }) => {
     const [likes , setLikes] = useState([]);
     const [hasLiked , setHasLiked] = useState(false);
     const [loggedIn , setLoggedIn] = useState(false);
+    const [open , setOpen] = useRecoilState(modalState);
     const router = useRouter();
 
     useEffect(() => {
@@ -96,7 +99,10 @@ const Post = ({post }) => {
                 className='rounded-2xl mr-2 w-full'
             />
             <div className='flex justify-between text-gray-500 p-2 '>
-                <ChatIcon className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100 ' />
+                <ChatIcon 
+                    onClick={() => setOpen(!open)}
+                    className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100 ' 
+                />
                 <TrashIcon 
                     // To do check who created this post before delete
                     onClick={handleDeletePost}
