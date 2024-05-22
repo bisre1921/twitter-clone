@@ -1,8 +1,57 @@
 import { ChartBarIcon, ChatIcon, DotsHorizontalIcon, HeartIcon, ShareIcon, TrashIcon } from '@heroicons/react/outline'
-import React from 'react'
+import { HeartIcon as HeartIconFilled } from '@heroicons/react/solid'
+import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
+import React, { useEffect } from 'react'
 import Moment from 'react-moment'
+import { auth, db } from '../../firebase'
+import { useState } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useRouter } from 'next/navigation'
 
 const Post = ({post }) => {
+    const [likes , setLikes] = useState([]);
+    const [hasLiked , setHasLiked] = useState(false);
+    const [loggedIn , setLoggedIn] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        onAuthStateChanged(auth , (user) => {
+          if(user) {
+            setLoggedIn(true);
+          } else {
+            setLoggedIn(false)
+          }
+        });
+       
+      } , [auth]);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db , "posts" , post.id , "likes"), 
+            (snapshot) => setLikes(snapshot.docs)
+        );
+
+    } , [db]);
+
+    useEffect(() => {
+        setHasLiked(
+            likes.findIndex((like) => like.id === "userid") !== -1
+        );
+    }, [likes]);
+
+    const handleLikePost = async () => {
+        if(loggedIn) {
+            if(hasLiked){
+                await deleteDoc(doc(db, "posts", post.id , "likes" , "userid"), {})
+            } else {
+                await setDoc(doc(db, "posts", post.id , "likes" , "userid"), {} )
+            }
+        } else {
+            router.push("/auth/signin");
+        }
+       
+       
+    }
   return (
     <div className='flex p-3 cursor-pointer border-b border-gray-200 '>
         <img 
@@ -17,7 +66,7 @@ const Post = ({post }) => {
                     <span className='text-sm sm:text-[15px]'>@{post.username} - </span>
                     <span className='text-sm sm:text-[15px] hover:underline'>
                         <Moment fromNow>
-                            {post?.timestamp?.toDate()}
+                            {post?.data().timestamp?.toDate()}
                         </Moment>
                         {post.timestamp}
                     </span>
@@ -35,7 +84,30 @@ const Post = ({post }) => {
             <div className='flex justify-between text-gray-500 p-2 '>
                 <ChatIcon className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100 ' />
                 <TrashIcon className='h-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100' />
-                <HeartIcon className='h-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100' />
+                <div className='flex items-center '>
+                    {hasLiked ? (
+                        <HeartIconFilled 
+                            onClick={handleLikePost} 
+                            className='h-9 hoverEffect p-2 text-red-600 hover:bg-red-100' 
+                        />
+                    ) : (
+                        <HeartIcon
+                            onClick={handleLikePost} 
+                            className='h-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100' 
+                        />
+                    )}
+                    {
+                        likes.length > 0 && (
+                            <p 
+                                className={`text-sm text-gray-500 select-none ${hasLiked ? "text-red-600" : ""}`}
+                            >
+                                {likes.length}
+                            </p>
+                        )
+                    }
+                </div>
+                
+                
                 <ShareIcon className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100' />
                 <ChartBarIcon className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100' /> 
             </div>
