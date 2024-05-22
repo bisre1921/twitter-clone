@@ -1,5 +1,6 @@
 import { ChartBarIcon, ChatIcon, DotsHorizontalIcon, HeartIcon, ShareIcon, TrashIcon } from '@heroicons/react/outline'
 import React from 'react'
+import Moment from 'react-moment'
 
 const Post = ({post }) => {
   return (
@@ -12,17 +13,22 @@ const Post = ({post }) => {
         <div className='flex-1'>
             <div className='flex items-center justify-between'>
                 <div className='flex items-center space-x-1 whitespace-nowrap'>
-                    <h4 className='font-bold text-[15px] sm:text-[16px] hover:underline'>{post.name}</h4>
+                    <h4 className='font-bold text-[15px] sm:text-[16px] hover:underline'>{post.data().name}</h4>
                     <span className='text-sm sm:text-[15px]'>@{post.username} - </span>
-                    <span className='text-sm sm:text-[15px] hover:underline'>{post.timestamp}</span>
+                    <span className='text-sm sm:text-[15px] hover:underline'>
+                        <Moment fromNow>
+                            {post?.timestamp?.toDate()}
+                        </Moment>
+                        {post.timestamp}
+                    </span>
                 </div>
                 <DotsHorizontalIcon className='h-10 hoverEffect w-10 hover:bg-sky-100 hover:text-sky-500 p-2' />
             </div>
             <p className='text-gray-800 text-[15px] sm:text-[16px] mb-2 '>
-                {post.text}
+                {post.data().text}
             </p>
             <img 
-                src={post.img}
+                src={post.data().image}
                 alt="post image" 
                 className='rounded-2xl mr-2 w-full'
             />

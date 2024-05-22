@@ -61,13 +61,14 @@ const Input = () => {
         }
       }
 
- if(loading) {
-    return (
-        <div>
-            <h1>Loading...</h1>
-        </div>
-    )
- }
+//  if(loading) {
+//     return (
+//         <div>
+//             <h1>Loading...</h1>
+//         </div>
+//     )
+//  }
+
   return (
     <>
     {loggedIn && (
@@ -103,21 +104,27 @@ const Input = () => {
                     </div>
                 )}
                 <div className='flex items-center justify-between pt-2.5'>
-                    <div className='flex '>
-                        <div onClick={() => filePickerRef.current.click()}>
-                            <PhotographIcon className='h-10 w-10 hoverEffect p-2 text-sky-500 hover:bg-sky-100' />
-                            <input type="file" hidden ref={filePickerRef} onChange={addImageToPost} />
-                        </div>
+                    {!loading && (
+                        <>
+                            <div className='flex '>
+                                <div onClick={() => filePickerRef.current.click()}>
+                                    <PhotographIcon className='h-10 w-10 hoverEffect p-2 text-sky-500 hover:bg-sky-100' />
+                                    <input type="file" hidden ref={filePickerRef} onChange={addImageToPost} />
+                                </div>
+                                
+                                <EmojiHappyIcon className='h-10 w-10 hoverEffect p-2 text-sky-500 hover:bg-sky-100' />
+                            </div>
+                            <button 
+                                disabled={!input} 
+                                onClick={handleSendPost}
+                                className='bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50'
+                            >
+                                Tweet
+                            </button>
+                        </>
                         
-                        <EmojiHappyIcon className='h-10 w-10 hoverEffect p-2 text-sky-500 hover:bg-sky-100' />
-                    </div>
-                    <button 
-                        disabled={!input} 
-                        onClick={handleSendPost}
-                        className='bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50'
-                    >
-                        Tweet
-                    </button>
+                    )}
+                    
                 </div>
             </div>
         </div>
