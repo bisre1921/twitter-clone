@@ -54,7 +54,7 @@ const Widgets = ({newsResults , randomUsersResult}) => {
             who to follow
           </h4>
           <AnimatePresence>
-            {randomUsersResult.slice(0 , randomUserNumber).map((randomUser) => (
+            {randomUsersResult?.slice(0 , randomUserNumber).map((randomUser) => (
               <motion.div
                 key={randomUser.login.username}
                 initial={{ opacity: 0 , y: 50 }}
