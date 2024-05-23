@@ -6,9 +6,10 @@ import { modalState, postIdState } from '../../atom/ModalAtom';
 import Modal from 'react-modal';
 import { EmojiHappyIcon, PhotographIcon, XIcon } from '@heroicons/react/outline';
 import { auth, db } from '../../firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, doc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import Moment from 'react-moment';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const CommentModal = () => {
   const [loggedIn , setLoggedIn] = useState(false);
@@ -16,6 +17,7 @@ const CommentModal = () => {
   const [open, setOpen] = useRecoilState(modalState);
   const [postId] = useRecoilState(postIdState);
   const [post, setPost] = useState({});
+  const router = useRouter();
 
   useEffect(() => {
     onAuthStateChanged(auth , (user) => {
@@ -45,7 +47,16 @@ const CommentModal = () => {
   }, [postId]);
 
   const handleSendComment = async () => {
-
+    await addDoc(collection(db, "posts", postId, "comments"), {
+        comment: input,
+        // name: auth.currentUser.displayName,
+        // username: auth.currentUser.displayName,
+        // userImg: auth.currentUser.photoURL,
+        timestamp: serverTimestamp(),
+    });
+    setOpen(false);
+    setInput("");
+    router.push(`/post/${postId}`)
   }
 
   return (

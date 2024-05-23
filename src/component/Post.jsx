@@ -13,7 +13,9 @@ import { modalState, postIdState } from '../../atom/ModalAtom'
 
 const Post = ({post }) => {
     const [likes , setLikes] = useState([]);
+    const [comments , setComments] = useState([]);
     const [hasLiked , setHasLiked] = useState(false);
+    const [hasCommented , setHasCommented] = useState(false);
     const [loggedIn , setLoggedIn] = useState(false);
     const [open , setOpen] = useRecoilState(modalState);
     const [postId , setPostId] = useRecoilState(postIdState);
@@ -35,6 +37,14 @@ const Post = ({post }) => {
         const unsubscribe = onSnapshot(
             collection(db , "posts" , post.id , "likes"), 
             (snapshot) => setLikes(snapshot.docs)
+        );
+
+    } , [db]);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db , "posts" , post.id , "comments"), 
+            (snapshot) => setComments(snapshot.docs)
         );
 
     } , [db]);
@@ -97,23 +107,31 @@ const Post = ({post }) => {
             </p>
             <img 
                 src={post.data().image}
-                alt="post image" 
+                alt="" 
                 className='rounded-2xl mr-2 w-full'
             />
             <div className='flex justify-between text-gray-500 p-2 '>
-                <ChatIcon 
-                    onClick={() => {
-                        if(loggedIn) {
-                            setPostId(post.id);
-                            setOpen(!open)
-                        } else {
-                            router.push("/auth/signin");
+                <div className='flex items-center select-none'>
+                    <ChatIcon 
+                        onClick={() => {
+                            if(loggedIn) {
+                                setPostId(post.id);
+                                setOpen(!open)
+                            } else {
+                                router.push("/auth/signin");
+                            }
+                            
                         }
-                        
-                    }
-                    } 
-                    className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100 ' 
-                /> 
+                        } 
+                        className='h-9 hoverEffect p-2 hover:text-sky-500 hover:bg-sky-100 ' 
+                    /> 
+                    {comments.length > 0 && (
+                        <p className='text-sm text-gray-500 select-none'>
+                            {comments.length}
+                        </p>
+                    )}
+                </div>
+               
                 <TrashIcon 
                     // To do check who created this post before delete
                     onClick={handleDeletePost}
