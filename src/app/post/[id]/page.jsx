@@ -54,12 +54,13 @@ import React, { use, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import SideBar from '../../../component/SideBar';
 import Widgets from '../../../component/Widgets';
+import Comment from '../../../component/Comment';
 import Post from '../../../component/Post';
 import CommentModal from '../../../component/CommentModal';
 import { ArrowLeftIcon } from '@heroicons/react/outline';
 import '../../globals.css';
 import { db } from '../../../../firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
 
 const Posts = () => {
   const router = useRouter();
@@ -68,6 +69,7 @@ const Posts = () => {
   const [loading, setLoading] = useState(true);
   const  {id} = useParams();
   const [post , setPost] = useState(null);
+  const [comments , setComments] = useState([]);
 
   useEffect(() => {
     const fetchNewsAndUsers = async () => {
@@ -95,7 +97,20 @@ const Posts = () => {
       (snapshot) => {
         setPost(snapshot.data());
       }
-    )} , [db , id])
+    )} , [db , id]);
+
+    useEffect(() => {
+      onSnapshot(
+        query(
+          collection(db , "posts" , id , "comments") , 
+          orderBy("timestamp" , "desc")
+        ) , 
+        (snapshot) => {
+          // setComments(snapshot.docs.map((doc) => doc.data()));
+          setComments(snapshot.docs);
+        }
+      )
+    } , [db , id]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -113,6 +128,18 @@ const Posts = () => {
         </div>
         <Post id={id} post={post} />
         {/* Your post content goes here */}
+        {comments.length > 0 && (
+          <>
+            {comments.map((comment) => (
+              <Comment 
+                key={comment.id} 
+                id={comment.id}
+                comment={comment.data()}
+              />
+            ))}
+          </>
+        )}
+        
       </div>
 
       <Widgets newsResults={newsResults} randomUsersResult={randomUsersResult} />
