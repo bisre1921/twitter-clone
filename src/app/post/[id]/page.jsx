@@ -130,13 +130,14 @@ const Posts = () => {
         {/* Your post content goes here */}
         {comments.length > 0 && (
           <>
-            {comments.map((comment) => (
-              <Comment 
-                key={comment.id} 
-                id={comment.id}
-                comment={comment.data()}
-              />
-            ))}
+          {comments.map((comment) => (
+            <Comment 
+              key={comment.id} 
+              commentId={comment.id}
+              originalPostId={id}
+              comment={comment.data()}
+            />
+          ))}
           </>
         )}
         

@@ -91,9 +91,18 @@ const Post = ({ post, id }) => {
           </div>
           <DotsHorizontalIcon className='h-10 hoverEffect w-10 hover:bg-sky-100 hover:text-sky-500 p-2' />
         </div>
-        <p className='text-gray-800 text-[15px] sm:text-[16px] mb-2 '>{post?.text}</p>
+        <p 
+          onClick={() => router.push(`/post/${id}`)}
+          className='text-gray-800 text-[15px] sm:text-[16px] mb-2 '
+        >
+          {post?.text}
+        </p>
         {post?.image && (
-          <img src={post?.image} alt='' className='rounded-2xl mr-2 w-full' />
+          <img 
+            onClick={() => router.push(`/post/${id}`)}
+            src={post?.image} alt='' 
+            className='rounded-2xl mr-2 w-full' 
+          />
         )}
         <div className='flex justify-between text-gray-500 p-2 '>
           <div className='flex items-center select-none'>

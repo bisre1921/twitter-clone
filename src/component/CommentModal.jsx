@@ -53,6 +53,7 @@ const CommentModal = () => {
         // username: auth.currentUser.displayName,
         // userImg: auth.currentUser.photoURL,
         timestamp: serverTimestamp(),
+        // userId : auth.currentUser.uid
     });
     setOpen(false);
     setInput("");
