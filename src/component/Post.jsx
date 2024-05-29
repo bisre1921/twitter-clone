@@ -9,25 +9,16 @@ import { useRouter } from 'next/navigation';
 import { deleteObject, ref } from 'firebase/storage';
 import { useRecoilState } from 'recoil';
 import { modalState, postIdState } from '../../atom/ModalAtom';
+import { userState } from '../../atom/UserAtom';
 
 const Post = ({ post, id }) => {
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [open, setOpen] = useRecoilState(modalState);
   const [postId, setPostId] = useRecoilState(postIdState);
+  const [currentUser, setCurrentUser] = useRecoilState(userState);
   const router = useRouter();
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -48,15 +39,17 @@ const Post = ({ post, id }) => {
   }, [db, id]);
 
   useEffect(() => {
-    setHasLiked(likes.findIndex((like) => like.id === 'userid') !== -1);
-  }, [likes]);
+    setHasLiked(likes.findIndex((like) => like.id === currentUser?.uid) !== -1);
+  }, [likes , currentUser]);
 
   const handleLikePost = async () => {
-    if (loggedIn) {
+    if (currentUser) {
       if (hasLiked) {
-        await deleteDoc(doc(db, 'posts', id, 'likes', 'userid'));
+        await deleteDoc(doc(db, 'posts', id, 'likes', currentUser?.uid));
       } else {
-        await setDoc(doc(db, 'posts', id, 'likes', 'userid'), {});
+        await setDoc(doc(db, 'posts', id, 'likes', currentUser?.uid), {
+          username: currentUser?.username,
+        });
       }
     } else {
       router.push('/auth/signin');
@@ -65,7 +58,7 @@ const Post = ({ post, id }) => {
 
   const handleDeletePost = async () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      if (loggedIn) {
+      if (currentUser) {
         await deleteDoc(doc(db, 'posts', id));
         if (post?.image) {
           deleteObject(ref(storage, `posts/${id}/image`));
@@ -108,7 +101,7 @@ const Post = ({ post, id }) => {
           <div className='flex items-center select-none'>
             <ChatIcon
               onClick={() => {
-                if (loggedIn) {
+                if (currentUser) {
                   setPostId(id);
                   setOpen(!open);
                 } else {
@@ -121,12 +114,14 @@ const Post = ({ post, id }) => {
               <p className='text-sm text-gray-500 select-none'>{comments.length}</p>
             )}
           </div>
-
-          <TrashIcon
-            // To do check who created this post before delete
+          
+          {currentUser?.uid === post?.userId && (
+            <TrashIcon
             onClick={handleDeletePost}
             className='h-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100'
-          />
+            />
+          )}
+         
           <div className='flex items-center '>
             {hasLiked ? (
               <HeartIconFilled

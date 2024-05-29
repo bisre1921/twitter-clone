@@ -7,30 +7,38 @@ import { onAuthStateChanged, updateCurrentUser } from 'firebase/auth';
 import { addDoc, collection , doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useRef } from 'react';
 import {getDownloadURL, ref, uploadString} from "firebase/storage";
+import { userState } from '../../atom/UserAtom.jsx';
+import { useRecoilState } from 'recoil';
 
 const Input = () => {
-    const [loggedIn , setLoggedIn] = useState(false);
+    // const [loggedIn , setLoggedIn] = useState(false);
     const [input , setInput] = useState("");
+    const [currentUser , setCurrentUser] = useRecoilState(userState);
     const [loading , setLoading] = useState(false);
     const [selectedFile , setSelectedFile] = useState(null);
     const filePickerRef = useRef(null);
 
-    useEffect(() => {
-        onAuthStateChanged(auth , (user) => {
-          if(user) {
-            setLoggedIn(true);
-          } else {
-            setLoggedIn(false)
-          }
-        });
+    // useEffect(() => {
+    //     onAuthStateChanged(auth , (user) => {
+    //       if(user) {
+    //         setLoggedIn(true);
+    //       } else {
+    //         setLoggedIn(false)
+    //       }
+    //     });
        
-      } , [auth]);
+    //   } , [auth]);
 
 
       const handleSendPost = async () => {
         setLoading(true)
         const docRef = await addDoc(collection(db , "posts") , {
+            id: currentUser.uid,
             text: input ,
+            userImg : currentUser.userImg , 
+            timestamp: serverTimestamp() ,
+            name: currentUser.name,
+            username: currentUser.username,
             timestamp: serverTimestamp() , 
 
         });
@@ -61,6 +69,11 @@ const Input = () => {
         }
       }
 
+      const handleSignOut = () => {
+        auth.signOut();
+        setCurrentUser(null);
+      }
+
 //  if(loading) {
 //     return (
 //         <div>
@@ -71,12 +84,12 @@ const Input = () => {
 
   return (
     <>
-    {loggedIn && (
+    {currentUser && (
         <div className='flex border-b border-gray-200 p-3 space-x-3'>
             <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmOGm_08yLUO2XUZLNvp6na5KnPUQjbwvypH668bkgcw&s" 
+                src={currentUser?.userImg} 
                 alt="user image" 
-                onClick={() => auth.signOut()}
+                onClick={handleSignOut}
                 className='h-11 w-11 rounded-full cursor-pointer hover:brightness-95'
             />
             <div className='w-full divide-y divide-gray-200 '>

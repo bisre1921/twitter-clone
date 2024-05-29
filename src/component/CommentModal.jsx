@@ -10,25 +10,27 @@ import { addDoc, collection, doc, onSnapshot, serverTimestamp } from 'firebase/f
 import Moment from 'react-moment';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { userState } from '../../atom/UserAtom';
 
 const CommentModal = () => {
-  const [loggedIn , setLoggedIn] = useState(false);
+  // const [loggedIn , setLoggedIn] = useState(false);
   const [input , setInput] = useState("");
   const [open, setOpen] = useRecoilState(modalState);
   const [postId] = useRecoilState(postIdState);
+  const [currentUser , setCurrentUser] = useRecoilState(userState);
   const [post, setPost] = useState({});
   const router = useRouter();
 
-  useEffect(() => {
-    onAuthStateChanged(auth , (user) => {
-      if(user) {
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false)
-      }
-    });
+  // useEffect(() => {
+  //   onAuthStateChanged(auth , (user) => {
+  //     if(user) {
+  //       setLoggedIn(true);
+  //     } else {
+  //       setLoggedIn(false)
+  //     }
+  //   });
    
-  } , [auth]);
+  // } , [auth]);
 
   useEffect(() => {
     if (postId) {
@@ -49,11 +51,11 @@ const CommentModal = () => {
   const handleSendComment = async () => {
     await addDoc(collection(db, "posts", postId, "comments"), {
         comment: input,
-        // name: auth.currentUser.displayName,
-        // username: auth.currentUser.displayName,
-        // userImg: auth.currentUser.photoURL,
+        name: currentUser.name,
+        username: currentUser.username,
+        userImg: currentUser.userImg,
         timestamp: serverTimestamp(),
-        // userId : auth.currentUser.uid
+        userId : currentUser.uid
     });
     setOpen(false);
     setInput("");
@@ -102,7 +104,7 @@ const CommentModal = () => {
                 
                     <div className='flex p-3 space-x-3'>
                         <img 
-                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmOGm_08yLUO2XUZLNvp6na5KnPUQjbwvypH668bkgcw&s" 
+                            src={currentUser?.userImg}
                             alt="user image" 
                             className='h-11 w-11 rounded-full cursor-pointer hover:brightness-95'
                         />

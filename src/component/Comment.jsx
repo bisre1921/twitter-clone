@@ -17,17 +17,18 @@ const Comment = ({ comment, commentId , originalPostId }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [open, setOpen] = useRecoilState(modalState);
   const [postId, setPostId] = useRecoilState(postIdState);
+  const [currentUser, setCurrentUser] = useRecoilState(userState);
   const router = useRouter();
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setLoggedIn(true);
+  //     } else {
+  //       setLoggedIn(false);
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -49,14 +50,16 @@ const Comment = ({ comment, commentId , originalPostId }) => {
 
   useEffect(() => {
     setHasLiked(likes.findIndex((like) => like.id === 'userid') !== -1);
-  }, [likes]);
+  }, [likes , currentUser]);
 
   const handleLikeComment = async () => {
-    if (loggedIn) {
+    if (currentUser) {
       if (hasLiked) {
-        await deleteDoc(doc(db, 'posts', originalPostId, "comments" , commentId , 'likes', 'userid'));
+        await deleteDoc(doc(db, 'posts', originalPostId, "comments" , commentId , 'likes', currentUser?.uid));
       } else {
-        await setDoc(doc(db, 'posts', originalPostId, "comments" , commentId , 'likes', 'userid'), {});
+        await setDoc(doc(db, 'posts', originalPostId, "comments" , commentId , 'likes', currentUser?.uid), {
+          username: currentUser?.displayName,
+        });
       }
     } else {
       router.push('/auth/signin');
@@ -65,7 +68,7 @@ const Comment = ({ comment, commentId , originalPostId }) => {
 
   const handleDeleteComment = async () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      if (loggedIn) {
+      if (currentUser) {
         await deleteDoc(doc(db, 'posts', originalPostId , "comments" , commentId));
         // if (post?.image) {
         //   deleteObject(ref(storage, `posts/${id}/image`));
@@ -99,7 +102,7 @@ const Comment = ({ comment, commentId , originalPostId }) => {
           <div className='flex items-center select-none'>
             <ChatIcon
               onClick={() => {
-                if (loggedIn) {
+                if (currentUser) {
                   setPostId(originalPostId);
                   setOpen(!open);
                 } else {
