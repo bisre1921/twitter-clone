@@ -1,11 +1,11 @@
 "use client";
 
-// import {db} from "../../../../firebase.jsx";
 import { getProviders, signIn } from "next-auth/react";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../../../../firebase";
+import { auth, db } from "../../../../firebase";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 const SignIn = () => {
   const [providers, setProviders] = useState(null);
@@ -35,22 +35,35 @@ const SignIn = () => {
   const onGoogleClick = async () => {
     try {
       //const auth = getAuth();
-      setLoading(true);
+      // setLoading(true);
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      const user = auth.currentUser.providerData[0];
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        await setDoc(docRef , {
+          name: user.displayName,
+          email: user.email,
+          username: user.displayName.split(" ").join("").toLowerCase(),
+          userImg: user.photoURL,
+          uid: user.uid,
+          timestamp: serverTimestamp(),
+        })
+      }
       router.push("/");
-      setLoading(false);
+      // setLoading(false);
     } catch (error) {
       console.log(error);
     }
   }
-  if(loading) {
-    return (
-      <div className="flex items-center min-h-full justify-center">
-        <h1>Loading...</h1>
-      </div>
-    )
-  }
+  // if(loading) {
+  //   return (
+  //     <div className="flex items-center min-h-full justify-center">
+  //       <h1>Loading...</h1>
+  //     </div>
+  //   )
+  // }
   return (
       <div className="flex justify-center mt-20 items-center space-x-8">
         <img
